@@ -4,7 +4,7 @@ varying vec2 texcoord;
 
 #include "/global/post/taa.glsl"
 
-#if TAA_MODE != 0 || REFLECTIONS >= 2
+#if TAA_MODE != 0 || REFLECTIONS >= 2 || defined DYNAMIC_EXPOSURE
 /* DRAWBUFFERS:04 */
 #else
 /* DRAWBUFFERS:0 */
@@ -30,6 +30,7 @@ vec3 motion_blur(vec3 Color, vec2 PrevCoord, vec2 CurrentCoord) {
 
 void main() {
     vec4 Color = texture2D(colortex0, texcoord);
+    vec2 NewExposureData = vec2(read_dynamic_exposure(), 0.18);
 
     #if TAA_MODE != 0 || defined MOTION_BLUR
     bool IsDH;
@@ -43,13 +44,28 @@ void main() {
     }
     #endif
 
+    #ifdef DYNAMIC_EXPOSURE
+    if (all(equal(ivec2(gl_FragCoord.xy), ivec2(10, 37)))) {
+        NewExposureData = calculate_dynamic_exposure();
+    }
+    #endif
+
     #if TAA_MODE != 0
     gl_FragData[1].xyz = TAA(Color.rgb, vec3(texcoord, Depth), PrevCoord, IsDH);
     #elif REFLECTIONS >= 2
     gl_FragData[1] = Color;
+    #elif defined DYNAMIC_EXPOSURE
+    gl_FragData[1] = Color;
+    #endif
+
+    #ifdef DYNAMIC_EXPOSURE
+    if (all(equal(ivec2(gl_FragCoord.xy), ivec2(10, 37)))) {
+        gl_FragData[1] = vec4(NewExposureData, 0.0, 1.0);
+    }
     #endif
 
     Color.rgb *= EXPOSURE;
+    Color.rgb *= read_dynamic_exposure();
     Color.rgb = apply_tonemap(Color.rgb);
 
     #if TONEMAP_OPERATOR != 3

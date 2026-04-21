@@ -13,6 +13,52 @@ vec3 apply_tonemap(vec3 X) {
     #endif
 }
 
+vec2 R2_samples(int n) {
+    return fract(vec2(0.75487765, 0.56984026) * float(n));
+}
+
+float dynamic_exposure_from_luminance(float Luminance) {
+    Luminance = max(Luminance, 1e-8);
+    return 0.18 / log2(Luminance * 2.5 + 1.045) * 0.62;
+}
+
+float read_dynamic_exposure() {
+    #ifdef DYNAMIC_EXPOSURE
+    float StoredExposure = texelFetch2D(gaux1, ivec2(10, 37), 0).r;
+    if (StoredExposure <= 0.0) StoredExposure = 1.0;
+    StoredExposure = clamp(StoredExposure, 0.05, 12.0);
+    return mix(1.0, StoredExposure, DYNAMIC_EXPOSURE_STRENGTH);
+    #else
+    return 1.0;
+    #endif
+}
+
+vec2 calculate_dynamic_exposure() {
+    const int SampleCount = 50;
+    float LogLuminance = 0.0;
+
+    for (int i = 0; i < SampleCount; i++) {
+        vec2 Xi = R2_samples((frameCounter % 2000) * SampleCount + i);
+        vec2 Coord = 0.5 + (Xi - 0.5) * 0.7;
+        vec3 SampleColor = texture2D(colortex0, Coord).rgb;
+        LogLuminance += log(max(get_luminance(SampleColor), 0.00003051757));
+    }
+
+    float AvgLuminance = exp(LogLuminance / float(SampleCount));
+    float PrevLuminance = texelFetch2D(gaux1, ivec2(10, 37), 0).g;
+    if (PrevLuminance <= 0.0) PrevLuminance = AvgLuminance;
+    AvgLuminance = clamp(mix(AvgLuminance, PrevLuminance, 0.95), 0.00003051757, 65000.0);
+
+    float TargetExposure = dynamic_exposure_from_luminance(AvgLuminance) * 1.35;
+    float PrevExposure = texelFetch2D(gaux1, ivec2(10, 37), 0).r;
+    if (PrevExposure <= 0.0) PrevExposure = TargetExposure;
+    PrevExposure = clamp(PrevExposure, 0.05, 12.0);
+
+    float AdaptRate = clamp(DYNAMIC_EXPOSURE_SPEED * exp(-0.016 / max(frameTime, 0.0001) + 1.0), 0.0, 1.0);
+    float Exposure = mix(PrevExposure, TargetExposure, AdaptRate);
+    return vec2(clamp(Exposure, 0.05, 12.0), AvgLuminance);
+}
+
 vec3 apply_saturation(vec3 Color, float Sat) {
     float luminance = get_luminance(Color);
     return mix(vec3(luminance), Color, Sat);
