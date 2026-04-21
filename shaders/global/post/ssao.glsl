@@ -9,7 +9,7 @@ const vec2 poisson_disk_2d[] = vec2[8](
     vec2(0.05891867438075504, -0.16082515533796937)
 );
 
-vec3 pastel_ssao(vec3 Color, vec3 ViewPos, float Dither, bool IsDH) {
+vec3 ssao(vec3 Color, vec3 ViewPos, float Dither, bool IsDH) {
     float Depth = -ViewPos.z;
     float dx = dFdx(Depth);
     float dy = dFdy(Depth);
@@ -41,12 +41,8 @@ vec3 pastel_ssao(vec3 Color, vec3 ViewPos, float Dither, bool IsDH) {
         Hits += 1.0;
     }
 
-    Factor /= (Hits == 0.0 ? 1.0 : Hits);
+    Factor = Hits > 0.0 ? Factor / Hits : 0.0;
 
-    // pastel lighten factor to keep it soft and gentle :3
-    float pastelStrength = 0.5; // lower means lighter shadows
-
-    vec3 pastelColor = mix(Color, vec3(1.0, 0.9, 0.95), Factor * pastelStrength); // mix with a soft pastel pinkish white
-
-    return pastelColor;
+    float Occlusion = 1.0 - Factor * SSAO_STRENGTH;
+    return Color * Occlusion;
 }
