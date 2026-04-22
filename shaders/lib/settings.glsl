@@ -197,6 +197,8 @@
 //#define IMAGE_SHARPENING
 #define SHARPENING 0.2 // [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
+#define CELSHADING
+
 #define TONEMAP_OPERATOR 1 // [1 2 3 4]
 
 #define DH_NOISE
@@ -235,4 +237,7 @@ const float sunPathRotation = -30; // [-40 -35 -30 -25 -20 -15 -10 -5 0 5 10 15 
 #endif
 
 #ifdef SMAA
+#endif
+
+#ifdef CELSHADING
 #endif

@@ -5,6 +5,7 @@
 #include "/global/post/ssao.glsl"
 #include "/global/water.glsl"
 #include "/global/post/godrays.glsl"
+#include "/global/post/celshading.glsl"
 
 // Sky, Clouds, etc
 
@@ -69,6 +70,10 @@ void main() {
     #endif
 
     if (Depth >= 0.56) { // Skip JUST the hand
+        #ifdef CELSHADING
+        Color.rgb = apply_celshading(Color.rgb, texcoord);
+        #endif
+
         Color.rgb = get_fog_main(PlayerPos, Color.rgb, Depth, SkyColor);
 
         #if defined DIMENSION_OVERWORLD && defined GODRAYS
