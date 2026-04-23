@@ -179,6 +179,7 @@ option.END_AURORA1_B=Bleu de l'aurore 1 de l'End
 option.END_AURORA2_R=Rouge de l'aurore 2 de l'End
 option.END_AURORA2_G=Vert de l'aurore 2 de l'End
 option.END_AURORA2_B=Bleu de l'aurore 2 de l'End
+option.CELSHADING=Cel-shading
 
 value.TAA_MODE.0=Désactivé
 value.TAA_MODE.1=Débruitage uniquement
@@ -229,3 +230,4 @@ screen.DEBUG=Débogage
 profile.FAST=§bRapide
 profile.FANCY=§aDétaillé
 profile.FABULOUS=§dFabuleux
+profile.QAQ=§bQAQ

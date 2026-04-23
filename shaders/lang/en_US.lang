@@ -191,6 +191,7 @@ option.AURORA_BOREALIS.comment=Adds an aurora borealis effect at night (only in 
 option.AURORA_STRENGTH=Aurora Strength
 option.AURORA_HEIGHT=Aurora Height
 option.AURORA_EVERYWHERE=Aurora in all biomes
+option.CELSHADING=Cel-shading
 
 value.TAA_MODE.0=Off
 value.TAA_MODE.1=Denoise Only
@@ -243,3 +244,4 @@ screen.DEBUG=Debug
 profile.FAST=§bFast
 profile.FANCY=§aFancy
 profile.FABULOUS=§dFabulous
+profile.QAQ=§bQAQ
